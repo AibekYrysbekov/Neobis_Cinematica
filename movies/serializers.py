@@ -35,7 +35,13 @@ class SeatSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = '__all__'
+        fields = ['user', 'movie', 'cinema',  'showtime', 'seat', 'room', 'quantity', 'amount']
+
+    # def to_representation(self, instance):
+    #     representation = super().to_representation(instance)
+    #     if instance.pk:
+    #         representation['amount'] = instance.save()
+    #     return representation
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
