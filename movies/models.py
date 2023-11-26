@@ -30,7 +30,6 @@ class Room(models.Model):
     room_name = models.CharField(max_length=100)
     capacity = models.PositiveIntegerField()
     room_type = models.CharField(max_length=100)
-    seat_id = models.ManyToOneRel
 
     def __str__(self):
         return self.room_name
@@ -61,7 +60,7 @@ class Ticket(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     showtime = models.ForeignKey(Showtime, on_delete=models.CASCADE)
-    seat = models.ForeignKey(Seat, on_delete=models.CASCADE)
+    seat = models.ManyToManyField(Seat)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     cinema = models.ForeignKey(Cinema, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -88,6 +87,7 @@ class Feedback(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        # unique_together = ('user',)
 
 
 class Discount(models.Model):

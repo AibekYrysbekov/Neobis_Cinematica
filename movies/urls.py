@@ -12,5 +12,7 @@ urlpatterns = [
     path('showtime/', ShowtimeAPIListView.as_view(), name='showtime-list-create'),
     path('seat/', SeatAPIListView.as_view(), name='seat-list-create'),
     path('feedback/', FeedbackAPIListView.as_view(), name='feedback-list-create'),
+    path('feedback/<int:pk>', FeedbackAPIDeleteView.as_view(), name='feedback-detail'),
+    path('purchase-history', UserPurchaseHistoryView.as_view(), name='purchase-history-list'),
 
 ]
