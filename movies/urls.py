@@ -14,5 +14,6 @@ urlpatterns = [
     path('feedback/', FeedbackAPIListView.as_view(), name='feedback-list-create'),
     path('feedback/<int:pk>', FeedbackAPIDeleteView.as_view(), name='feedback-detail'),
     path('purchase-history', UserPurchaseHistoryView.as_view(), name='purchase-history-list'),
+    path('discount', DiscountAPIListView.as_view(), name='discount-list-create'),
 
 ]

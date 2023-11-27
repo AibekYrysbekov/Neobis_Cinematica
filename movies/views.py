@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.db.models import Sum
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -15,11 +15,26 @@ class MovieAPIListView(generics.ListAPIView):
     serializer_class = MovieSerializer
     permission_classes = (IsAuthenticated,)
 
+    def list(self, request, *args, **kwargs):
+        movies = self.get_queryset()
+        serializer = self.serializer_class(movies, many=True)
+        return Response({"data": serializer.data, "message": "Список фильмов успешно получен"},
+                        status=status.HTTP_200_OK)
+
 
 class MovieAPICreateView(generics.CreateAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     permission_classes = (IsAdminUser,)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"data": serializer.data, "message": "Фильм успешно создан"},
+                            status=status.HTTP_201_CREATED)
+        return Response({"error": serializer.errors, "message": "Ошибка при добавлении фильма"},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class MovieAPIUpdateView(generics.RetrieveUpdateDestroyAPIView):
@@ -33,16 +48,30 @@ class TicketAPIListView(generics.ListCreateAPIView):
     serializer_class = TicketSerializer
     permission_classes = (IsAuthenticated,)
 
+    def list(self, request, *args, **kwargs):
+        tickets = self.get_queryset()
+        serializer = self.serializer_class(tickets, many=True)
+        return Response({"data": serializer.data, "message": "Список билетов успешно получен"},
+                        status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user = request.user
+            ticket = serializer.instance
+            purchase_amount = ticket.amount
+            discount, created = Discount.objects.get_or_create(user=user)
+            discount.apply_discount(purchase_amount)
+            return Response({"data": serializer.data, "message": "Билет успешно создан"},
+                            status=status.HTTP_201_CREATED)
+        return Response({"error": serializer.errors, "message": "Ошибка при создании билета"},
+                        status=status.HTTP_400_BAD_REQUEST)
+
 
 class CinemaAPIListView(generics.ListCreateAPIView):
     queryset = Cinema.objects.all()
     serializer_class = TicketSerializer
-    permission_classes = (IsAdminUser,)
-
-
-class CinemaAPIListView(generics.ListCreateAPIView):
-    queryset = Cinema.objects.all()
-    serializer_class = CinemaSerializer
     permission_classes = (IsAdminUser,)
 
 
@@ -92,3 +121,9 @@ class UserPurchaseHistoryView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         return PurchaseHistory.objects.filter(user=user)
+
+
+class DiscountAPIListView(generics.ListCreateAPIView):
+    queryset = Discount.objects.all()
+    serializer_class = DiscountSerializer
+    permission_classes = (IsAdminUser,)
